@@ -11,11 +11,11 @@ State flows:  retrieve → decide → answer
 """
 
 import os
-from typing import TypedDict, Annoted, Literal
+from typing import TypedDict, Annotated, Literal
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
-from langchain.schema import HumanMessage, SystemMessage
-from langchain.graph import StateGraph, END
+from langchain_core.messages import HumanMessage, SystemMessage
+from langgraph.graph import StateGraph, END
 from retrieval.retriever import retrieve_and_rerank, format_context, RetrievedChunk
 from tools.web_search import web_search, format_web_results
 
@@ -45,9 +45,9 @@ class AgentState(TypedDict):
     answer: str
     needs_web: bool
 
-def node_retrieve(state: AgentState, vectorestore) -> AgentState:
+def node_retrieve(state: AgentState, vectorstore) -> AgentState:
     """Node 1: Retrieve from PDF vector store."""
-    chunks = retrieve_and_rerank(state["query"], vectorestore)
+    chunks = retrieve_and_rerank(state["query"], vectorstore)
     return {
         **state,
         "pdf_chunks": chunks,
@@ -115,7 +115,7 @@ def build_rag_graph(vectorstore):
     """Build and compile the LangGraph RAG workflow."""
     # Wrap node_retrieve to close over vectorstore
     def retrieve(state):
-        return node_retrieve(state, vectorestore)
+        return node_retrieve(state, vectorstore)
     
     graph = StateGraph(AgentState)
     graph.add_node("retrieve", retrieve)
